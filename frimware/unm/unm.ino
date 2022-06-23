@@ -5,6 +5,10 @@
 #include <CytronMotorDriver.h>
 #include <Encoder.h>
 
+
+
+
+
 const int MOTOR_1 = 0;
 const int MOTOR_2 = 1;
 const int CW = 1;
@@ -38,11 +42,13 @@ float vel = 0.0; //as Twist msgs depend on Vector3 which is float64
 float omega = 0.0;
 float VR, VL;
 
+
 //-----------------------------------------------------------------------------------------
 ros::NodeHandle  nh;
 //------------------------------Publish init----------------------------------------------
 geometry_msgs::Point32 Point_msg;
 ros::Publisher enc_pub("/encoder", &Point_msg);
+
 
 //-----------------------------------DC Motors Callback subscribers
 void motors_cb(const geometry_msgs::Twist& msg)
@@ -81,11 +87,19 @@ void motors_cb(const geometry_msgs::Twist& msg)
     }
  
 }
+
+
+    
+
+
 //--------------------subscribers---------------------------
 ros::Subscriber<geometry_msgs::Twist> sub("/cmd_vel", &motors_cb);
 
 void setup() {
   Serial.begin(57600);
+
+ 
+  
 //---------------------------ROS Setup
       nh.advertise(enc_pub);  
       nh.subscribe(sub);
@@ -93,24 +107,22 @@ void setup() {
 }
 
 
-
 void loop() {
-
 //Right Encoder
   long rnewPosition = rEnc.read();
   if (rnewPosition != roldPosition) {
     roldPosition = rnewPosition;
     Serial.println(rnewPosition);
   }
-  //PID_Control();
   //----left encoder
   long lnewPosition = lEnc.read();
   if (lnewPosition != loldPosition) {
     loldPosition = lnewPosition; //update positions
     Serial.println(lnewPosition);
   }
+
   //-------end of encoder
-  void velocity();
+ 
  //-----------------------ROS publishing  
         Point_msg.x=rnewPosition;
         Point_msg.y=lnewPosition;
@@ -122,6 +134,9 @@ void loop() {
 
   
 }
+
+
+    
 void Motor_Cmd(int motor, int DIR, int PWM)     //Function that writes to the motors
 {
   if (motor == MOTOR_1)

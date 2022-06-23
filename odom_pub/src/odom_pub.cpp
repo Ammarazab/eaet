@@ -8,6 +8,7 @@
 #define N 855.0
 #define L 0.46 //distance between 2 wheel
 double Dc=0.0;
+double dc=0.0;
 double RtickOld=0.0; // previews right read
 double RtickNew=0.0; // new right read
 double LtickOld=0.0; // previews left read
@@ -19,8 +20,10 @@ double LtickNew=0.0; // new left read
   double vx = 0.0;
   double vy = 0.0;
   double vth = 0.0;
+    double vl,vr,v1,v2;
+
   
- 
+
 
 void encoder_cb(const geometry_msgs::Point32& msg){
 
@@ -29,6 +32,7 @@ LtickNew=(double)msg.y;
 Dc=((2*3.14*R*((RtickNew-RtickOld)/N))+((2*3.14*R*((LtickNew-LtickOld)/N))))/2;
 x = x + Dc*cos(th);
 y = y + Dc*sin(th);
+
 th= th + (((2*3.14*R*(RtickNew-RtickOld)/N)-((2*3.14*R*(LtickNew-LtickOld)/N)))/L);
 RtickOld=RtickNew;
 LtickOld=LtickNew;
@@ -43,25 +47,35 @@ int main(int argc, char** argv){
   tf::TransformBroadcaster odom_broadcaster;
 	
   
-  ros::Time current_time, last_time;
+
+   ros::Time current_time, last_time;
   current_time = ros::Time::now();
   last_time = ros::Time::now();
+  double dts = (current_time - last_time).toSec();
+  vr = ((RtickNew-RtickOld)/dts)*(3.14/180);
+  vr = ((LtickNew-LtickOld)/dts)*(3.14/180);
+  v1= vr*R;
+  v2=vl*R;
+
+ double vx = (v1+v2)/2;
+  double vy = 0.0;
+  double vth = (v1-v2)/L;
   
 
   ros::Rate r(1.0);
   while(n.ok()){
 
     ros::spinOnce();               // check for incoming messages
-    current_time = ros::Time::now();
+    //current_time = ros::Time::now();
 
     //compute odometry in a typical way given the velocities of the robot
-    double dt = (current_time - last_time).toNSec();
+    //double dt = (current_time - last_time).toSec();
     //---odom calculation------
+    
 
-
-    double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
-    double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
-    double delta_th = vth * dt;
+    double delta_x = (vx * cos(th) - vy * sin(th)) * dts;
+    double delta_y = (vx * sin(th) + vy * cos(th)) * dts;
+    double delta_th = vth * dts;
 
     x =x + delta_x;
     y =y + delta_y;
